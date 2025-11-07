@@ -1,0 +1,42 @@
+## index.html (Cliente)
+stage.innerHTML = ''
+if(!currentRoom){ roomLabel.textContent='—'; roomCodeLabel.textContent='—'; publicWordLabel.textContent='(se genera al iniciar)'; return }
+currentRoom.players.forEach(p=>{
+const el = document.createElement('div'); el.className = 'player'
+el.innerHTML = `<div class="avatar" style="background:${p.color};color:#041325">${(p.name||'J').slice(0,2).toUpperCase()}</div><div style='flex:1'><div style='font-weight:700'>${p.name}</div><div class='small'>${p.id}</div></div>`
+playersList.appendChild(el)
+})
+
+currentRoom.players.forEach((p,idx)=>{
+const s = document.createElement('div'); s.className='seat'
+s.innerHTML = `<div class='card ${p.revealed? 'revealed' : ''}' data-idx='${idx}' style='background:${p.color};color:#041325'>${p.revealed? (p.isImpostor? 'IMPOSTOR' : currentRoom.word) : '🌈'}</div><div class='name' style='margin-top:10px;font-weight:700'>${p.name}</div><div class='hint small'>Desliza / haz click para revelar</div>`
+const card = s.querySelector('.card')
+let startY = null
+const touchStart = (e)=>{startY = (e.touches?e.touches[0].clientY:e.clientY)}
+const touchEnd = (e)=>{const endY = (e.changedTouches?e.changedTouches[0].clientY:e.clientY); if(startY===null) return; if(endY - startY > 40){ requestReveal(p.id) } else { requestReveal(p.id) } startY=null }
+card.addEventListener('touchstart', touchStart)
+card.addEventListener('mousedown', touchStart)
+card.addEventListener('touchend', touchEnd)
+card.addEventListener('mouseup', touchEnd)
+stage.appendChild(s)
+})
+}
+
+function requestReveal(playerId){
+if(!currentRoom) return
+ws.send(JSON.stringify({type:'reveal', data:{playerId}}))
+}
+
+// Keep connection alive / reconnect
+setInterval(()=>{ if(!ws || ws.readyState !== WebSocket.OPEN) connect() }, 3000)
+
+// Demo init
+document.addEventListener('DOMContentLoaded', ()=>{
+// fill default name
+createNameInput.value = 'Host'
+joinNameInput.value = 'Jugador'
+})
+</script>
+</body>
+</html>
+```
