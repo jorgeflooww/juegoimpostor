@@ -110,11 +110,7 @@
     <div class="screen active" id="setupScreen">
       <h1>Juego del Impostor</h1>
 
-      <label>Palabra secreta (la misma para todos):</label>
-      <input type="text" id="wordInput" placeholder="Ej: Playa" />
-
-      <label>Pista (algo relacionado con la palabra):</label>
-      <input type="text" id="hintInput" placeholder="Ej: Arena y sol" />
+      <!-- La palabra y la pista se eligen automáticamente -->
 
       <label>Nombres de los jugadores (uno por línea):</label>
       <textarea id="playersInput" rows="5" placeholder="Ana
@@ -162,6 +158,17 @@ Carlos"></textarea>
     let secretWord = "";
     let hint = "";
 
+    const wordPool = [
+      { word: "Playa", hint: "Arena y mar" },
+      { word: "Hospital", hint: "Médicos y pacientes" },
+      { word: "Colegio", hint: "Clases y profesores" },
+      { word: "Aeropuerto", hint: "Aviones y maletas" },
+      { word: "Cine", hint: "Pantalla y palomitas" },
+      { word: "Bosque", hint: "Árboles y naturaleza" },
+      { word: "Restaurante", hint: "Comida y camareros" },
+      { word: "Estadio", hint: "Deporte y gradas" }
+    ];
+
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -170,8 +177,9 @@ Carlos"></textarea>
     }
 
     function startGame() {
-      secretWord = document.getElementById('wordInput').value.trim();
-      hint = document.getElementById('hintInput').value.trim();
+      const random = wordPool[Math.floor(Math.random() * wordPool.length)];
+      secretWord = random.word;
+      hint = random.hint;
       players = document.getElementById('playersInput').value
         .split('\n')
         .map(p => p.trim())
@@ -179,8 +187,8 @@ Carlos"></textarea>
 
       const impostors = parseInt(document.getElementById('impostorCount').value);
 
-      if (!secretWord || players.length < 3) {
-        alert('Introduce una palabra y al menos 3 jugadores');
+      if (players.length < 3) {
+        alert('Introduce al menos 3 jugadores');
         return;
       }
 
@@ -209,10 +217,10 @@ Carlos"></textarea>
 
     function reveal() {
       const role = roles[current];
-      document.getElementById('wordText').textContent = role;
+      document.getElementById('wordText').textContent = role === 'IMPOSTOR' ? 'IMPOSTOR' : secretWord;
       document.getElementById('wordText').style.display = 'block';
 
-      if (role !== 'IMPOSTOR') {
+      if (role === 'IMPOSTOR') {
         document.getElementById('hintText').textContent = 'Pista: ' + hint;
         document.getElementById('hintText').style.display = 'block';
       }
